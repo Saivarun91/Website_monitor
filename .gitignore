@@ -1,0 +1,16 @@
+# Environment Variables
+.env
+
+# Python Virtual Environment
+env/
+venv/
+
+# Logs
+*.log
+
+# Screenshots (optional)
+screenshots/
+
+# OS Files
+.DS_Store
+Thumbs.db
