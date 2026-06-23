@@ -1,40 +1,35 @@
 name: Deploy Website Monitor
 
 on:
-push:
-branches:
-- main
+  push:
+    branches:
+      - main
 
 jobs:
+  deploy:
+    runs-on: ubuntu-latest
 
-deploy:
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-```
-runs-on: ubuntu-latest
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.2.0
 
-steps:
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
 
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+          script: |
+            cd /var/www/website-monitor
 
-  - name: Deploy to VPS
-    uses: appleboy/ssh-action@v1.2.0
+            git pull origin main
 
-    with:
-      host: ${{ secrets.VPS_HOST }}
-      username: ${{ secrets.VPS_USER }}
-      key: ${{ secrets.VPS_SSH_KEY }}
+            source venv/bin/activate
 
-      script: |
-        cd /var/www/website-monitor
+            pip install -r requirements.txt
 
-        git pull origin main
+            systemctl restart website-monitor
 
-        source venv/bin/activate
-
-        pip install -r requirements.txt
-
-        systemctl restart website-monitor
-
-        systemctl is-active website-monitor
-```
+            systemctl is-active website-monitor
