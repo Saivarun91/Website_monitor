@@ -188,3 +188,55 @@ def get_website_rule(
     conn.close()
 
     return row
+
+def get_old_screenshots():
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute("""
+        SELECT
+            id,
+            screenshot_path
+        FROM website_checks
+        WHERE
+        (
+            status_code BETWEEN 200 AND 299
+            AND created_at < NOW() - INTERVAL '4 days'
+        )
+        OR
+        (
+            (
+                status_code IS NULL
+                OR status_code < 200
+                OR status_code >= 300
+            )
+            AND created_at < NOW() - INTERVAL '7 days'
+        )
+    """)
+
+    rows = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return rows
+
+def clear_screenshot_path(check_id):
+
+    conn = get_connection()
+    cur = conn.cursor()
+
+    cur.execute(
+        """
+        UPDATE website_checks
+        SET screenshot_path = NULL
+        WHERE id = %s
+        """,
+        (check_id,)
+    )
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
